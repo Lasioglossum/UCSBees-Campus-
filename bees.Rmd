@@ -1,0 +1,147 @@
+---
+title: "BeesBaby"
+author: "Taylor Curtis"
+output: html_document
+---
+
+setwd(file.path(here(), "desktop/Rfiles"))
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = '/Users/taylorcurtis/desktop')
+
+library(here)
+library(tidyverse)
+library(janitor)
+library(forcats)
+library(packcircles)
+library(ggplot2)
+library(viridis)
+library(kableExtra)
+library(RColorBrewer)
+library(lubridate)
+library(rotl)
+library(picante)
+library(rgbif)
+beedata_raw <- read_csv("bees_data.csv") %>%
+  clean_names() 
+```
+
+
+```{r}
+beedata <- beedata_raw %>%
+  mutate(transect = ifelse(transect == "Marine Science Building", "Marine Science", transect)) %>%
+  separate(date, sep = "/", into = c("month", "day", "year"))
+```
+
+
+```{r}
+interactions <- beedata %>%
+  group_by(transect, invert_cat, plant_order) %>%
+  summarise(n = length(transect))
+
+interactions %>%
+  ggplot(aes(x = transect, y = n, fill = invert_cat)) +
+  geom_col() + 
+  theme_bw() +
+  labs(x = "Site", y = "Number of Interaction") +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 120), breaks = seq(0, 120, 20)) +
+  scale_fill_manual(values = c("darkslategray", "lightcyan1"), name = "Type of Bee")
+
+interactions %>%
+  ggplot(aes(x = plant_order, y = n, fill = invert_cat)) +
+  geom_col() + 
+  theme_bw() +
+  labs(x = "Order", y = "Number of Interaction") +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 120), breaks = seq(0, 120, 20)) +
+  scale_fill_manual(values = c("darkslategray", "lightcyan1"), name = "Type of Bee")
+
+
+```
+
+
+```{r}
+
+plant_order <- c("Boraginales","Geraniales", "Ranunculales", "Sapindales", "Lamiales", "Fabales", "Asterales", "Dipsacales", "Saxifragales","Caryophyllales","Solanales" )
+(resolved_names <- tnrs_match_names(plant_order))
+po <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(po)
+
+plant_family <- c( "Geraniaceae", "Papaveraceae” , Rutacea", "Boraginaceae", "Lamiaceae", "Fabaceae", "Papaveraceae", "Asteraceae", "Saxifragaceae", "Polygonaceae", "Convolvulaceae" )
+(resolved_names <- tnrs_match_names(plant_family))
+pf <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pf)
+
+plant_genus <- c("Geranium", "Eschscholzia","Murraya", "Echium", "Salvia", "Westringia", "Lupines", "Achillea", "Symphyotrichum", "Osteospermum", "Scabiosa", "Heuchera", "Eriogonum", "Medicago", "Calystegia", "Heliantheae", "Pseudognaphalium")
+(resolved_names <- tnrs_match_names(plant_genus))
+pg <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pg)
+```
+
+###north hall###
+```{r}
+plant_genus_nh <- c("Geranium", "Eschscholzia","Murraya", "Echium")
+(resolved_names <- tnrs_match_names(plant_genus_nh))
+pg_nh <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pg_nh)
+```
+
+###noble hall###
+```{r}
+plant_genus_nb <- c( "Salvia", "Westringia")
+(resolved_names <- tnrs_match_names(plant_genus_nb))
+pg_nb <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pg_nb)
+```
+
+###MSI###
+```{r}
+plant_genus_msi <- c("Eschscholzia", "Echium", "Salvia", "Lupines", "Achillea", "Symphyotrichum", "Osteospermum", "Scabiosa", "Heuchera", "Eriogonum", "Medicago")
+(resolved_names <- tnrs_match_names(plant_genus_msi))
+pg_msi <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pg_msi)
+```
+
+```{r}
+pg
+```
+
+
+###lagoon###
+```{r}
+plant_genus_l <- c("Eschscholzia","Calystegia", "Heliantheae", "Pseudognaphalium")
+(resolved_names <- tnrs_match_names(plant_genus_l))
+pg_l <- tol_induced_subtree(ott_ids = ott_id(resolved_names))
+plot(pg_l)
+```
+
+###Phylocom Testing###
+```{r}
+data("phylocom")
+phylocom
+comm <- phylocom$sample
+comm
+```
+
+data(phylocom)
+names(phylocom)
+
+phy <- phylocom$phylo
+comm <- phylocom$sample
+traits <- phylocom$traits
+
+class(comm)
+colnames(comm)
+rownames(comm)
+
+head(traits)
+traitA <- df2vec(traits, "traitA")
+
+prunedphy <- prune.sample(comm, phy)
+prunedphy
+
+pd.result <- pd(comm, phy, include.root=TRUE)
+pd.result
+```
